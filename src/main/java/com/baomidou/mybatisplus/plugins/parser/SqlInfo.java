@@ -13,32 +13,40 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.baomidou.mybatisplus.parser;
-
-import org.apache.ibatis.logging.Log;
-import org.apache.ibatis.logging.LogFactory;
+package com.baomidou.mybatisplus.plugins.parser;
 
 /**
  * <p>
- * 抽象 SQL 解析类
+ * Sql Info
  * </p>
  *
  * @author hubin
  * @Date 2017-06-20
  */
-public abstract class AbstractSqlParser {
+public class SqlInfo {
 
-    // 日志
-    protected final Log logger = LogFactory.getLog(this.getClass());
+    private String sql;// SQL 内容
+    private boolean orderBy = true;// 是否排序
 
-    /**
-     * <p>
-     * 获取优化 SQL 方法
-     * </p>
-     *
-     * @param sql SQL 语句
-     * @return SQL 信息
-     */
-    public abstract SqlInfo optimizeSql(String sql);
+    public static SqlInfo newInstance() {
+        return new SqlInfo();
+    }
 
+    public String getSql() {
+        return sql;
+    }
+
+    public SqlInfo setSql(String sql) {
+        this.sql = sql;
+        return this;
+    }
+
+    public boolean isOrderBy() {
+        return orderBy;
+    }
+
+    public SqlInfo setOrderBy(boolean orderBy) {
+        this.orderBy = orderBy;
+        return this;
+    }
 }

@@ -33,10 +33,10 @@ import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
 import com.baomidou.mybatisplus.enums.DBType;
-import com.baomidou.mybatisplus.parser.AbstractSqlParser;
-import com.baomidou.mybatisplus.parser.SqlInfo;
 import com.baomidou.mybatisplus.plugins.pagination.DialectFactory;
 import com.baomidou.mybatisplus.plugins.pagination.Pagination;
+import com.baomidou.mybatisplus.plugins.parser.ISqlParser;
+import com.baomidou.mybatisplus.plugins.parser.SqlInfo;
 import com.baomidou.mybatisplus.toolkit.JdbcUtils;
 import com.baomidou.mybatisplus.toolkit.PluginUtils;
 import com.baomidou.mybatisplus.toolkit.SqlUtils;
@@ -57,7 +57,7 @@ public class CachePaginationInterceptor extends PaginationInterceptor implements
     /* 溢出总页数，设置第一页 */
     private boolean overflowCurrent = false;
     // COUNT SQL 解析
-    private AbstractSqlParser sqlParser;
+    private ISqlParser sqlParser;
     /* 方言类型 */
     private String dialectType;
     /* 方言实现类 */
@@ -71,37 +71,7 @@ public class CachePaginationInterceptor extends PaginationInterceptor implements
 
         Object target = invocation.getTarget();
         if (target instanceof StatementHandler) {
-            StatementHandler statementHandler = (StatementHandler) PluginUtils.realTarget(invocation.getTarget());
-            MetaObject metaStatementHandler = SystemMetaObject.forObject(statementHandler);
-            RowBounds rowBounds = (RowBounds) metaStatementHandler.getValue("delegate.rowBounds");
-
-            if (rowBounds == null || rowBounds == RowBounds.DEFAULT) {
-                return invocation.proceed();
-            }
-            BoundSql boundSql = (BoundSql) metaStatementHandler.getValue("delegate.boundSql");
-            String originalSql = boundSql.getSql();
-            Connection connection = (Connection) invocation.getArgs()[0];
-            DBType dbType = StringUtils.isNotEmpty(dialectType) ? DBType.getDBType(dialectType) : JdbcUtils.getDbType(connection.getMetaData().getURL());
-            if (rowBounds instanceof Pagination) {
-                Pagination page = (Pagination) rowBounds;
-                boolean orderBy = true;
-                if (page.isSearchCount()) {
-                    String tempSql = originalSql.replaceAll("(?i)ORDER[\\s]+BY", "ORDER BY");
-                    int orderByIndex = tempSql.toUpperCase().lastIndexOf("ORDER BY");
-                    if (orderByIndex <= -1) {
-                        orderBy = false;
-                    }
-                }
-                String buildSql = SqlUtils.concatOrderBy(originalSql, page, orderBy);
-                originalSql = DialectFactory.buildPaginationSql(page, buildSql, dbType, dialectClazz);
-            } else {
-                // support physical Pagination for RowBounds
-                originalSql = DialectFactory.buildPaginationSql(rowBounds, originalSql, dbType, dialectClazz);
-            }
-
-            metaStatementHandler.setValue("delegate.boundSql.sql", originalSql);
-            metaStatementHandler.setValue("delegate.rowBounds.offset", RowBounds.NO_ROW_OFFSET);
-            metaStatementHandler.setValue("delegate.rowBounds.limit", RowBounds.NO_ROW_LIMIT);
+            return super.intercept(invocation);
         } else {
             RowBounds rowBounds = (RowBounds) invocation.getArgs()[2];
             if (rowBounds == null || rowBounds == RowBounds.DEFAULT) {
@@ -148,16 +118,19 @@ public class CachePaginationInterceptor extends PaginationInterceptor implements
         }
     }
 
-    public void setDialectType(String dialectType) {
+    public CachePaginationInterceptor setDialectType(String dialectType) {
         this.dialectType = dialectType;
+        return this;
     }
 
-    public void setSqlParser(AbstractSqlParser sqlParser) {
+    public CachePaginationInterceptor setSqlParser(ISqlParser sqlParser) {
         this.sqlParser = sqlParser;
+        return this;
     }
 
-    public void setOverflowCurrent(boolean overflowCurrent) {
+    public CachePaginationInterceptor setOverflowCurrent(boolean overflowCurrent) {
         this.overflowCurrent = overflowCurrent;
+        return this;
     }
 
 }

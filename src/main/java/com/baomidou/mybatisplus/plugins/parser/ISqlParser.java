@@ -13,38 +13,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.baomidou.mybatisplus.parser;
+package com.baomidou.mybatisplus.plugins.parser;
+
+import org.apache.ibatis.reflection.MetaObject;
 
 /**
  * <p>
- * Sql Info
+ * SQL 解析接口
  * </p>
  *
  * @author hubin
- * @Date 2017-06-20
+ * @Date 2017-09-01
  */
-public class SqlInfo {
+public interface ISqlParser {
 
-    private String sql;// SQL 内容
-    private boolean orderBy = true;// 是否排序
+    /**
+     * <p>
+     * 获取优化 SQL 方法
+     * </p>
+     *
+     * @param metaObject 元对象
+     * @param sql        SQL 语句
+     * @return SQL 信息
+     */
+    SqlInfo optimizeSql(MetaObject metaObject, String sql);
 
-    public static SqlInfo newInstance() {
-        return new SqlInfo();
-    }
-
-    public String getSql() {
-        return sql;
-    }
-
-    public void setSql(String sql) {
-        this.sql = sql;
-    }
-
-    public boolean isOrderBy() {
-        return orderBy;
-    }
-
-    public void setOrderBy(boolean orderBy) {
-        this.orderBy = orderBy;
-    }
 }

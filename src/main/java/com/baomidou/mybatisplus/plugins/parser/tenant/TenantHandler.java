@@ -13,26 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.baomidou.mybatisplus.plugins.tenancy;
+package com.baomidou.mybatisplus.plugins.parser.tenant;
 
-import java.util.Properties;
+import net.sf.jsqlparser.expression.Expression;
 
 /**
  * <p>
- * 租户信息
+ * 租户处理器
  * </p>
  *
  * @author hubin
- * @since 2017-06-20
+ * @since 2017-08-31
  */
-public interface TenantInfo {
+public interface TenantHandler {
 
-    TenantInfo setHandlerConfig(Properties properties);
-
-    String getTenantId();
+    Expression getTenantId();
 
     String getTenantIdColumn();
 
-    TenantInfo setTenantIdColumn(String tenantIdColumn);
-
+    boolean doTableFilter(String tableName);
 }
